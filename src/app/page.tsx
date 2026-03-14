@@ -10,10 +10,12 @@ export default function Home() {
           <br />
           <span className="text-[var(--accent)]">Meet people.</span>
         </h1>
+
         <p className="mx-auto mt-6 max-w-2xl text-lg text-[var(--muted)]">
           Set your preferences, search for games you like, and host or join
           sessions around your city. No need to buy — just show up and play.
         </p>
+
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/signup"
@@ -21,11 +23,19 @@ export default function Home() {
           >
             Get started
           </Link>
+
           <Link
             href="/games"
             className="rounded-full border border-[var(--border)] bg-[var(--card)] px-6 py-3 text-base font-medium transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
           >
             Browse games
+          </Link>
+
+          <Link
+            href="/hub"
+            className="rounded-full border border-[#201217] bg-white px-6 py-3 text-base font-semibold text-[var(--foreground)] shadow-[0_4px_0_#f5d5c2] transition-all hover:-translate-y-0.5 hover:shadow-[0_7px_0_#f5d5c2]"
+          >
+            Enter the hub
           </Link>
         </div>
       </section>
@@ -35,6 +45,7 @@ export default function Home() {
           <h2 className="text-center text-2xl font-semibold text-[var(--foreground)]">
             How it works
           </h2>
+
           <div className="mt-12 grid gap-8 sm:grid-cols-3">
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6 text-center">
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)]/15 text-xl font-bold text-[var(--accent)]">
@@ -48,6 +59,7 @@ export default function Home() {
                 travel.
               </p>
             </div>
+
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6 text-center">
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)]/15 text-xl font-bold text-[var(--accent)]">
                 2
@@ -60,6 +72,7 @@ export default function Home() {
                 near you.
               </p>
             </div>
+
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6 text-center">
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)]/15 text-xl font-bold text-[var(--accent)]">
                 3
@@ -80,4 +93,3 @@ export default function Home() {
     </div>
   );
 }
-
