@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import Script from "next/script";
 import type { BoardGame } from "@/types/database";
 
 export function HostSessionForm({
@@ -30,34 +30,85 @@ export function HostSessionForm({
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const supabase = createClient();
-    const { error: err } = await supabase.from("game_sessions").insert({
-      host_id: (await supabase.auth.getUser()).data.user?.id,
-      game_id: form.game_id,
-      title: form.title,
-      city: form.city,
-      address: form.address || null,
-      venue_name: form.venue_name || null,
-      starts_at: form.starts_at,
-      max_players: form.max_players,
-      notes: form.notes || null,
-    });
-    setLoading(false);
-    if (err) {
-      setError(err.message);
+
+    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
+    if (!siteKey) {
+      setLoading(false);
+      setError("reCAPTCHA is not configured.");
       return;
     }
-    router.push("/sessions");
-    router.refresh();
+
+    let captchaToken: string;
+
+    try {
+      captchaToken = await new Promise<string>((resolve, reject) => {
+        if (typeof window === "undefined") {
+          reject(new Error("Window is not available"));
+          return;
+        }
+
+        const grecaptcha = (window as any).grecaptcha;
+
+        if (!grecaptcha) {
+          reject(new Error("reCAPTCHA is not loaded"));
+          return;
+        }
+
+        grecaptcha.ready(() => {
+          grecaptcha
+            .execute(siteKey, { action: "host_session" })
+            .then((token: string) => resolve(token))
+            .catch((err: unknown) => reject(err));
+        });
+      });
+    } catch (captchaError) {
+      setLoading(false);
+      setError("Failed to run reCAPTCHA. Please try again.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/host-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...form,
+          captchaToken,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        setError(data?.error ?? "Failed to create session.");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/sessions");
+      router.refresh();
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-      {error && (
-        <p className="rounded-lg bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">
-          {error}
-        </p>
-      )}
+    <>
+      <Script
+        src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? ""}`}
+        strategy="afterInteractive"
+      />
+      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+        {error && (
+          <p className="rounded-lg bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">
+            {error}
+          </p>
+        )}
       <div>
         <label className="block text-sm font-medium text-[var(--foreground)]">Game</label>
         <select
@@ -153,6 +204,7 @@ export function HostSessionForm({
       >
         {loading ? "Creating…" : "Host session"}
       </button>
-    </form>
+      </form>
+    </>
   );
 }
