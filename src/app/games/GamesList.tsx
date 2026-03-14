@@ -18,13 +18,15 @@ export function GamesList({ initialGames }: { initialGames: BoardGame[] }) {
 
   return (
     <>
-      <input
-        type="search"
-        placeholder="Search by name or description…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        className="mt-6 w-full max-w-md rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
-      />
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <input
+          type="search"
+          placeholder="Search by name or description…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full max-w-md rounded-full border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-[var(--foreground)] placeholder:text-[var(--muted)] shadow-sm focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+        />
+      </div>
       {filtered.length === 0 ? (
         <p className="mt-8 text-[var(--muted)]">
           {initialGames.length === 0
@@ -32,12 +34,12 @@ export function GamesList({ initialGames }: { initialGames: BoardGame[] }) {
             : "No games match your search."}
         </p>
       ) : (
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((game) => (
             <li key={game.id}>
               <Link
                 href={`/games/${game.id}`}
-                className="block rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 transition-colors hover:border-[var(--accent)] hover:shadow-md"
+                className="block h-full rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_4px_0_#f5d5c2] transition-transform transition-shadow hover:-translate-y-0.5 hover:shadow-[0_8px_0_#f5d5c2]"
               >
                 <h3 className="font-semibold text-[var(--foreground)]">{game.name}</h3>
                 {game.description && (

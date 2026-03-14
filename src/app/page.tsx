@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DiceSuggestion } from "@/components/DiceSuggestion";
 
 export default function Home() {
   return (
@@ -74,6 +75,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <DiceSuggestion />
     </div>
   );
 }
+

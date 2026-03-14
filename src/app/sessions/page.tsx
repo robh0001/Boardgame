@@ -30,7 +30,7 @@ export default async function SessionsPage() {
         </div>
         <Link
           href="/sessions/new"
-          className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-hover)]"
+          className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white shadow-[0_3px_0_#f06a25] transition-all hover:translate-y-0.5 hover:shadow-[0_1px_0_#f06a25]"
         >
           Host a session
         </Link>
@@ -41,15 +41,14 @@ export default async function SessionsPage() {
           No upcoming sessions. Be the first to host one!
         </p>
       ) : (
-        <ul className="mt-8 space-y-3">
+        <ul className="mt-8 space-y-4">
           {sessions.map((s) => {
-            const host = Array.isArray(s.host) ? s.host[0] : s.host;
             const game = Array.isArray(s.game) ? s.game[0] : s.game;
             return (
               <li key={s.id}>
                 <Link
                   href={`/sessions/${s.id}`}
-                  className="flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 transition-colors hover:border-[var(--accent)]"
+                  className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_4px_0_#f5d5c2] transition-transform transition-shadow hover:-translate-y-0.5 hover:shadow-[0_8px_0_#f5d5c2]"
                 >
                   <span className="font-semibold text-[var(--foreground)]">{s.title}</span>
                   <span className="text-[var(--muted)]">·</span>

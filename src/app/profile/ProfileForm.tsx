@@ -178,7 +178,7 @@ export function ProfileForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-full bg-[var(--accent)] py-2.5 font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-50"
+        className="w-full rounded-full bg-[var(--accent)] py-2.5 font-semibold text-white shadow-[0_3px_0_#f06a25] transition-all hover:translate-y-0.5 hover:shadow-[0_1px_0_#f06a25] disabled:opacity-50"
       >
         {loading ? "Saving…" : "Save preferences"}
       </button>
