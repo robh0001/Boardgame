@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Play & Meet — Board Game Social
 
-## Getting Started
+A social website where users set preferences, search for board games, and **host or join** game sessions around their city. Play without buying and meet new people.
 
-First, run the development server:
+## Features
+
+- **Auth** — Sign up / log in (Supabase Auth)
+- **Profile & preferences** — Display name, city, bio, preferred cities, max travel distance, favorite games
+- **Game catalog** — Browse and search board games (seeded list; no external API required)
+- **Sessions** — Host a session (game, date/time, city, venue) or join others’ sessions
+- **Session detail** — See host, when/where, player count, and join with one click
+
+## Setup
+
+### 1. Supabase
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. In the SQL Editor, run the contents of **`supabase/schema.sql`** to create tables and RLS.
+3. In **Authentication → URL Configuration**, set Site URL to `http://localhost:3000` and add `http://localhost:3000/auth/callback` to Redirect URLs.
+4. In **Settings → API**, copy the project URL and the `anon` public key.
+
+### 2. Environment
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Edit `.env.local` and set:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `NEXT_PUBLIC_SUPABASE_URL` — your Supabase project URL  
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — your Supabase anon key  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Seed games (optional)
 
-## Learn More
+The app ships with a curated list of board games. To seed the database:
 
-To learn more about Next.js, take a look at the following resources:
+1. Sign up and log in once.
+2. Open the browser console on your app and run:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```js
+fetch('/api/seed-games', { method: 'POST', credentials: 'include' }).then(r => r.json()).then(console.log)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Or use any HTTP client to `POST /api/seed-games` while authenticated. Seeding is idempotent (skips if games already exist).
 
-## Deploy on Vercel
+### 4. Run the app
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm install
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000).
+
+## Tech
+
+- **Next.js 16** (App Router), **TypeScript**, **Tailwind CSS**
+- **Supabase** — Auth, PostgreSQL, RLS
+
+## Project structure
+
+- `src/app` — Routes: `/`, `/login`, `/signup`, `/games`, `/games/[id]`, `/sessions`, `/sessions/new`, `/sessions/[id]`, `/profile`
+- `src/components` — `Navbar`
+- `src/lib/supabase` — Browser/server clients, middleware
+- `src/types/database.ts` — Shared types
+- `supabase/schema.sql` — DB schema and RLS

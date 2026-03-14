@@ -1,0 +1,92 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/games", label: "Games" },
+  { href: "/sessions", label: "Sessions" },
+];
+
+export function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signOut = async () => {
+    await createClient().auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]/95 backdrop-blur">
+      <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+        <Link href="/" className="text-xl font-bold text-[var(--accent)]">
+          Play & Meet
+        </Link>
+        <div className="flex items-center gap-6">
+          {navLinks.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`text-sm font-medium transition-colors hover:text-[var(--accent)] ${
+                pathname === href ? "text-[var(--accent)]" : "text-[var(--muted)]"
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+          {user ? (
+            <>
+              <Link
+                href="/profile"
+                className="text-sm font-medium text-[var(--muted)] transition-colors hover:text-[var(--accent)]"
+              >
+                Profile
+              </Link>
+              <button
+                type="button"
+                onClick={signOut}
+                className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)]"
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-sm font-medium text-[var(--muted)] transition-colors hover:text-[var(--accent)]"
+              >
+                Log in
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)]"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
+        </div>
+      </nav>
+    </header>
+  );
+}
