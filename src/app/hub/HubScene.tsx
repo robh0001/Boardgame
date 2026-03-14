@@ -15,9 +15,25 @@ type PlayerState = {
   y: number;
 };
 
-const VIEWPORT_HEIGHT = 780;
+type DistrictZone = {
+  id: "party" | "strategy" | "cozy" | "mystery";
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+const VIEWPORT_HEIGHT = 760;
+const CAMERA_WIDTH = 1550;
 const PLAYER_SPEED = 4.2;
 const INTERACTION_DISTANCE = 140;
+
+const DISTRICTS: DistrictZone[] = [
+  { id: "party", left: 120, top: 120, width: 520, height: 300 },
+  { id: "strategy", left: 1180, top: 120, width: 520, height: 300 },
+  { id: "cozy", left: 120, top: 820, width: 520, height: 300 },
+  { id: "mystery", left: 1180, top: 820, width: 520, height: 300 },
+];
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -46,6 +62,42 @@ function getNearestSession(
   return nearest;
 }
 
+function getDistrictId(session: HubSession): DistrictZone["id"] {
+  const x = session.x;
+  const y = session.y;
+
+  if (x < WORLD_WIDTH / 2 && y < WORLD_HEIGHT / 2) return "party";
+  if (x >= WORLD_WIDTH / 2 && y < WORLD_HEIGHT / 2) return "strategy";
+  if (x < WORLD_WIDTH / 2 && y >= WORLD_HEIGHT / 2) return "cozy";
+  return "mystery";
+}
+
+function getDistrictById(id: DistrictZone["id"]) {
+  return DISTRICTS.find((district) => district.id === id)!;
+}
+
+function getSafeSessionPosition(session: HubSession): HubSession {
+  const district = getDistrictById(getDistrictId(session));
+
+  const headerReserve = 96;
+  const horizontalPadding = 56;
+  const bottomPadding = 44;
+
+  return {
+    ...session,
+    x: clamp(
+      session.x,
+      district.left + horizontalPadding,
+      district.left + district.width - horizontalPadding
+    ),
+    y: clamp(
+      session.y,
+      district.top + headerReserve,
+      district.top + district.height - bottomPadding
+    ),
+  };
+}
+
 function District({
   x,
   y,
@@ -54,7 +106,6 @@ function District({
   title,
   subtitle,
   gradient,
-  children,
 }: {
   x: number;
   y: number;
@@ -63,32 +114,33 @@ function District({
   title: string;
   subtitle: string;
   gradient: string;
-  children?: React.ReactNode;
 }) {
   return (
     <div
-      className="absolute rounded-[34px] border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
+      className="absolute overflow-hidden rounded-[36px] border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
       style={{
         left: x,
         top: y,
         width,
         height,
         background:
-          "linear-gradient(180deg, rgba(9,14,27,0.88), rgba(8,12,24,0.96))",
+          "linear-gradient(180deg, rgba(10,15,28,0.92), rgba(8,12,24,0.98))",
       }}
     >
       <div
-        className="absolute inset-x-0 top-0 h-20 rounded-t-[34px]"
+        className="absolute inset-x-0 top-0 h-24"
         style={{
           background: gradient,
-          opacity: 0.92,
+          opacity: 0.95,
         }}
       />
-      <div className="relative z-10 p-5 text-white">
+
+      <div className="absolute inset-x-5 top-[88px] bottom-5 rounded-[28px] border border-white/6 bg-white/[0.03]" />
+
+      <div className="relative z-10 p-6 text-white">
         <div className="text-2xl font-extrabold">{title}</div>
         <div className="mt-1 text-sm text-white/80">{subtitle}</div>
       </div>
-      {children}
     </div>
   );
 }
@@ -96,23 +148,92 @@ function District({
 function BoothPad({
   x,
   y,
-  size = 130,
+  glow,
+  size = 136,
 }: {
   x: number;
   y: number;
+  glow: string;
   size?: number;
 }) {
   return (
+    <>
+      <div
+        className="absolute rounded-full blur-2xl"
+        style={{
+          left: x - size / 2,
+          top: y - size / 2 + 10,
+          width: size,
+          height: size,
+          background: glow,
+          opacity: 0.22,
+        }}
+      />
+      <div
+        className="absolute rounded-full border border-white/10"
+        style={{
+          left: x - size / 2,
+          top: y - size / 2 + 10,
+          width: size,
+          height: size,
+          background:
+            "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08), rgba(255,255,255,0.025) 58%, rgba(0,0,0,0.16) 100%)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+        }}
+      />
+    </>
+  );
+}
+
+function DecorativeTable({
+  x,
+  y,
+  color,
+}: {
+  x: number;
+  y: number;
+  color: string;
+}) {
+  return (
     <div
-      className="absolute rounded-full border border-white/10"
+      className="absolute rounded-full border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.22)]"
       style={{
-        left: x - size / 2,
-        top: y - size / 2,
-        width: size,
-        height: size,
-        background:
-          "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.07), rgba(255,255,255,0.02) 55%, rgba(0,0,0,0.15) 100%)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+        left: x,
+        top: y,
+        width: 72,
+        height: 72,
+        background: color,
+        opacity: 0.85,
+      }}
+    >
+      <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/70" />
+    </div>
+  );
+}
+
+function SmallCarpet({
+  x,
+  y,
+  width,
+  height,
+  color,
+}: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+}) {
+  return (
+    <div
+      className="absolute rounded-[24px] border border-white/10"
+      style={{
+        left: x,
+        top: y,
+        width,
+        height,
+        background: color,
+        opacity: 0.24,
       }}
     />
   );
@@ -149,6 +270,10 @@ export function HubScene({ sessions }: HubSceneProps) {
   const [selected, setSelected] = useState<HubSession | null>(null);
   const [pressedKeys, setPressedKeys] = useState<Record<string, boolean>>({});
 
+  const displaySessions = useMemo(() => {
+    return sessions.map(getSafeSessionPosition);
+  }, [sessions]);
+
   const moving = !!(
     pressedKeys["ArrowUp"] ||
     pressedKeys["ArrowDown"] ||
@@ -165,8 +290,8 @@ export function HubScene({ sessions }: HubSceneProps) {
   );
 
   const nearestSession = useMemo(() => {
-    return getNearestSession(player, sessions, INTERACTION_DISTANCE);
-  }, [player, sessions]);
+    return getNearestSession(player, displaySessions, INTERACTION_DISTANCE);
+  }, [player, displaySessions]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -249,17 +374,20 @@ export function HubScene({ sessions }: HubSceneProps) {
     return () => window.cancelAnimationFrame(frame);
   }, [pressedKeys]);
 
-  const cameraLeft = clamp(player.x - 620, 0, WORLD_WIDTH - 1240);
-  const cameraTop = clamp(player.y - VIEWPORT_HEIGHT / 2, 0, WORLD_HEIGHT - VIEWPORT_HEIGHT);
-
-  const party = sessions.filter((s) => s.zone === "party-plaza");
-  const strategy = sessions.filter((s) => s.zone === "strategy-square");
-  const cozy = sessions.filter((s) => s.zone === "cozy-corner");
-  const mystery = sessions.filter((s) => s.zone === "mystery-alley");
+  const cameraLeft = clamp(
+    player.x - CAMERA_WIDTH / 2,
+    0,
+    WORLD_WIDTH - CAMERA_WIDTH
+  );
+  const cameraTop = clamp(
+    player.y - VIEWPORT_HEIGHT / 2,
+    0,
+    WORLD_HEIGHT - VIEWPORT_HEIGHT
+  );
 
   return (
     <div
-      className="relative overflow-hidden rounded-[34px] border border-white/10"
+      className="overflow-hidden rounded-[34px] border border-white/10"
       style={{
         background: "#070b17",
         boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
@@ -298,28 +426,83 @@ export function HubScene({ sessions }: HubSceneProps) {
           }}
         >
           <div
-            className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10"
+            className="absolute inset-0 opacity-[0.05]"
             style={{
-              background:
-                "radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 35%, rgba(255,255,255,0.02) 70%, transparent 100%)",
-              boxShadow: "0 0 80px rgba(59,130,246,0.08)",
+              backgroundImage:
+                "radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)",
+              backgroundSize: "30px 30px",
             }}
           />
 
           <div
-            className="absolute left-[370px] top-[570px] h-[120px] w-[1160px] rounded-full border border-white/10"
+            className="absolute left-1/2 top-1/2 h-[460px] w-[460px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10"
             style={{
               background:
-                "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.08), rgba(255,255,255,0.05))",
+                "radial-gradient(circle, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.08) 36%, rgba(255,255,255,0.03) 72%, transparent 100%)",
+              boxShadow:
+                "0 0 120px rgba(59,130,246,0.12), inset 0 0 40px rgba(255,255,255,0.05)",
+            }}
+          />
+
+          <div
+            className="absolute left-[330px] top-[560px] h-[140px] w-[1240px] rounded-full border border-white/10"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.11), rgba(255,255,255,0.06))",
             }}
           />
           <div
-            className="absolute left-[880px] top-[180px] h-[860px] w-[120px] rounded-full border border-white/10"
+            className="absolute left-[880px] top-[130px] h-[980px] w-[140px] rounded-full border border-white/10"
             style={{
               background:
-                "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.08), rgba(255,255,255,0.05))",
+                "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.11), rgba(255,255,255,0.06))",
             }}
           />
+
+          <div className="absolute left-[670px] top-[560px] h-[140px] w-[220px] rounded-r-full bg-white/[0.04]" />
+          <div className="absolute left-[1010px] top-[560px] h-[140px] w-[220px] rounded-l-full bg-white/[0.04]" />
+          <div className="absolute left-[880px] top-[350px] h-[220px] w-[140px] rounded-b-full bg-white/[0.04]" />
+          <div className="absolute left-[880px] top-[700px] h-[220px] w-[140px] rounded-t-full bg-white/[0.04]" />
+
+          <div className="absolute left-[860px] top-[540px] h-[180px] w-[180px] rounded-full border border-cyan-300/15 bg-[radial-gradient(circle,rgba(34,211,238,0.18),rgba(34,211,238,0.04),transparent)]" />
+
+          <SmallCarpet
+            x={180}
+            y={230}
+            width={400}
+            height={160}
+            color="linear-gradient(135deg, rgba(255,122,24,0.24), rgba(255,179,71,0.10))"
+          />
+          <SmallCarpet
+            x={1220}
+            y={230}
+            width={400}
+            height={160}
+            color="linear-gradient(135deg, rgba(83,51,237,0.24), rgba(143,107,255,0.10))"
+          />
+          <SmallCarpet
+            x={180}
+            y={930}
+            width={400}
+            height={160}
+            color="linear-gradient(135deg, rgba(0,184,148,0.24), rgba(85,239,196,0.10))"
+          />
+          <SmallCarpet
+            x={1220}
+            y={930}
+            width={400}
+            height={160}
+            color="linear-gradient(135deg, rgba(181,23,158,0.24), rgba(255,77,141,0.10))"
+          />
+
+          <DecorativeTable x={170} y={250} color="linear-gradient(135deg, #ff7a18 0%, #ffb347 100%)" />
+          <DecorativeTable x={520} y={250} color="linear-gradient(135deg, #ff7a18 0%, #ffb347 100%)" />
+          <DecorativeTable x={1220} y={250} color="linear-gradient(135deg, #5333ed 0%, #8f6bff 100%)" />
+          <DecorativeTable x={1560} y={250} color="linear-gradient(135deg, #5333ed 0%, #8f6bff 100%)" />
+          <DecorativeTable x={170} y={950} color="linear-gradient(135deg, #00b894 0%, #55efc4 100%)" />
+          <DecorativeTable x={520} y={950} color="linear-gradient(135deg, #00b894 0%, #55efc4 100%)" />
+          <DecorativeTable x={1220} y={950} color="linear-gradient(135deg, #b5179e 0%, #ff4d8d 100%)" />
+          <DecorativeTable x={1560} y={950} color="linear-gradient(135deg, #b5179e 0%, #ff4d8d 100%)" />
 
           <District
             x={120}
@@ -331,7 +514,7 @@ export function HubScene({ sessions }: HubSceneProps) {
             gradient="linear-gradient(135deg, #ff7a18 0%, #ffb347 100%)"
           />
           <District
-            x={1260}
+            x={1180}
             y={120}
             width={520}
             height={300}
@@ -349,7 +532,7 @@ export function HubScene({ sessions }: HubSceneProps) {
             gradient="linear-gradient(135deg, #00b894 0%, #55efc4 100%)"
           />
           <District
-            x={1260}
+            x={1180}
             y={820}
             width={520}
             height={300}
@@ -358,11 +541,16 @@ export function HubScene({ sessions }: HubSceneProps) {
             gradient="linear-gradient(135deg, #b5179e 0%, #ff4d8d 100%)"
           />
 
-          {[...party, ...strategy, ...cozy, ...mystery].map((session) => (
-            <BoothPad key={`pad-${session.id}`} x={session.x} y={session.y + 10} />
+          {displaySessions.map((session) => (
+            <BoothPad
+              key={`pad-${session.id}`}
+              x={session.x}
+              y={session.y + 14}
+              glow={session.gradient}
+            />
           ))}
 
-          {sessions.map((session) => (
+          {displaySessions.map((session) => (
             <HostedGameSpot
               key={session.id}
               session={session}
@@ -373,8 +561,6 @@ export function HubScene({ sessions }: HubSceneProps) {
 
           <PlayerAvatar x={player.x} y={player.y} moving={moving} />
         </div>
-
-        <SessionPreviewCard session={selected} onClose={() => setSelected(null)} />
 
         {nearestSession && !selected && (
           <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-[#07111f]/95 px-4 py-2 text-sm font-semibold text-slate-100 shadow-lg">
@@ -393,6 +579,8 @@ export function HubScene({ sessions }: HubSceneProps) {
           </div>
         )}
       </div>
+
+      <SessionPreviewCard session={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

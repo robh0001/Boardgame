@@ -18,7 +18,7 @@ export function HostedGameSpot({
       type="button"
       onClick={onSelect}
       className="group absolute -translate-x-1/2 -translate-y-1/2 text-left"
-      style={{ left: session.x, top: session.y }}
+      style={{ left: session.x, top: session.y + 10 }}
       aria-label={`View ${session.title}`}
     >
       <div

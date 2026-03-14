@@ -38,7 +38,7 @@ export type HubSession = RawHubSession & {
   gradient: string;
 };
 
-export const WORLD_WIDTH = 1900;
+export const WORLD_WIDTH = 2100;
 export const WORLD_HEIGHT = 1240;
 
 type ZoneConfig = {
@@ -154,28 +154,28 @@ function pickZone(session: RawHubSession): ZoneConfig {
 export function buildHubSessions(rawSessions: RawHubSession[]): HubSession[] {
     const zoneSlots: Record<HubZoneId, { x: number; y: number }[]> = {
       "party-plaza": [
-        { x: 260, y: 250 },
-        { x: 470, y: 250 },
-        { x: 360, y: 360 },
-        { x: 560, y: 340 },
+        { x: 260, y: 330 },
+        { x: 500, y: 330 },
+        { x: 360, y: 470 },
+        { x: 560, y: 470 },
       ],
       "strategy-square": [
-        { x: 1400, y: 250 },
-        { x: 1610, y: 250 },
-        { x: 1500, y: 360 },
-        { x: 1300, y: 340 },
+        { x: 1400, y: 330 },
+        { x: 1640, y: 330 },
+        { x: 1520, y: 470 },
+        { x: 1320, y: 470 },
       ],
       "cozy-corner": [
-        { x: 260, y: 950 },
-        { x: 470, y: 950 },
-        { x: 360, y: 1060 },
-        { x: 560, y: 1040 },
+        { x: 260, y: 1030 },
+        { x: 500, y: 1030 },
+        { x: 360, y: 1170 },
+        { x: 560, y: 1170 },
       ],
       "mystery-alley": [
-        { x: 1400, y: 950 },
-        { x: 1610, y: 950 },
-        { x: 1500, y: 1060 },
-        { x: 1300, y: 1040 },
+        { x: 1400, y: 1030 },
+        { x: 1640, y: 1030 },
+        { x: 1520, y: 1170 },
+        { x: 1320, y: 1170 },
       ],
     };
   
