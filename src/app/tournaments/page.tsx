@@ -15,6 +15,7 @@ export default async function TournamentsPage() {
       status,
       format,
       players_per_match,
+
       game:board_games(name),
       host:profiles!host_id(display_name)
     `,
@@ -22,28 +23,28 @@ export default async function TournamentsPage() {
     .order("starts_at", { ascending: true });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Tournaments</h1>
-          <p className="mt-1 text-[var(--muted)]">
+          <h1 className="text-xl font-bold text-[var(--foreground)] sm:text-2xl">Tournaments</h1>
+          <p className="mt-1 text-sm text-[var(--muted)] sm:text-base">
             Host multi-round tournaments or join events for your favorite games.
           </p>
         </div>
         <Link
           href="/tournaments/new"
-          className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white shadow-[0_3px_0_#f06a25] transition-all hover:translate-y-0.5 hover:shadow-[0_1px_0_#f06a25]"
+          className="shrink-0 rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white shadow-[0_3px_0_#f06a25] transition-all hover:translate-y-0.5 hover:shadow-[0_1px_0_#f06a25]"
         >
           Host a tournament
         </Link>
       </div>
 
       {!tournaments?.length ? (
-        <p className="mt-8 text-[var(--muted)]">
+        <p className="mt-6 text-[var(--muted)] sm:mt-8">
           No tournaments yet. Be the first to host one!
         </p>
       ) : (
-        <ul className="mt-8 space-y-4">
+        <ul className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
           {tournaments.map((t) => {
             const game = Array.isArray(t.game) ? t.game[0] : t.game;
             const host = Array.isArray(t.host) ? t.host[0] : t.host;
@@ -69,8 +70,7 @@ export default async function TournamentsPage() {
                   <span className="text-sm text-[var(--muted)]">
                     {new Date(t.starts_at).toLocaleString()}
                   </span>
-                  <span className="ml-auto flex flex-wrap items-center gap-2">
-      
+                  <span className="ml-auto flex flex-wrap items-center justify-end gap-2">
                     <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-[var(--accent)]">
                       {t.format.replace(/_/g, " ")}
                     </span>

@@ -36,12 +36,12 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
   const game = Array.isArray(gameRaw) ? gameRaw[0] : gameRaw;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto min-w-0 max-w-2xl px-4 py-6 sm:py-8">
       <Link href="/sessions" className="text-sm text-[var(--muted)] hover:text-[var(--accent)]">
         ← Back to sessions
       </Link>
-      <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-[0_5px_0_#f5d5c2]">
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">{session.title}</h1>
+      <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_5px_0_#f5d5c2] sm:p-6">
+        <h1 className="text-xl font-bold text-[var(--foreground)] break-words sm:text-2xl">{session.title}</h1>
         <p className="mt-1 text-[var(--muted)]">{game?.name}</p>
         <dl className="mt-6 grid gap-2 text-sm">
           <div>
@@ -54,7 +54,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           </div>
           <div>
             <dt className="text-[var(--muted)]">Where</dt>
-            <dd>
+            <dd className="break-words">
               {session.city}
               {session.venue_name && ` · ${session.venue_name}`}
               {session.address && ` · ${session.address}`}

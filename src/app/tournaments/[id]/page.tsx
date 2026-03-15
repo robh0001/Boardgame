@@ -82,10 +82,10 @@ export default async function TournamentPage({
     ) ?? [];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto min-w-0 max-w-6xl px-4 py-6 sm:py-8">
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl font-bold text-[var(--foreground)] break-words sm:text-2xl">
             {tournament.name}
           </h1>
           <p className="mt-1 text-sm text-[var(--muted)]">
@@ -134,7 +134,7 @@ export default async function TournamentPage({
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex shrink-0 flex-col items-stretch gap-3 sm:items-end">
           {isHost ? (
             <HostTournamentControls
               tournamentId={id}
@@ -150,7 +150,7 @@ export default async function TournamentPage({
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="mt-6 grid min-w-0 gap-6 sm:mt-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="space-y-6">
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4">
             <h2 className="text-sm font-semibold text-[var(--foreground)]">Players</h2>

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { fetchUpcomingSessions } from "@/lib/sessions";
 import {
   buildHubSessions,
   mergeRealAndDummySessions,
@@ -8,25 +9,7 @@ import { HubScene } from "./HubScene";
 
 export default async function HubPage() {
   const supabase = await createClient();
-
-  const { data: sessions } = await supabase
-    .from("game_sessions")
-    .select(`
-      id,
-      title,
-      city,
-      address,
-      venue_name,
-      starts_at,
-      max_players,
-      notes,
-      status,
-      host:profiles!host_id(display_name, avatar_url, city),
-      game:board_games(name, image_url, min_players, max_players, play_time_minutes, description)
-    `)
-    .gte("starts_at", new Date().toISOString())
-    .in("status", ["open", "full"])
-    .order("starts_at", { ascending: true });
+  const sessions = await fetchUpcomingSessions(supabase);
 
   const { data: playerRows } = await supabase
     .from("session_players")
@@ -70,9 +53,9 @@ export default async function HubPage() {
   const hubSessions = buildHubSessions(allSessions);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 text-white">
+    <div className="mx-auto min-w-0 max-w-7xl px-4 py-4 text-white sm:px-6 sm:py-6">
       <div
-        className="mb-5 overflow-hidden rounded-[30px]"
+        className="mb-4 overflow-hidden rounded-2xl sm:mb-5 sm:rounded-[30px]"
         style={{
           border: "1px solid rgba(255,255,255,0.10)",
           background:
@@ -81,28 +64,28 @@ export default async function HubPage() {
         }}
       >
         <div
+          className="p-4 sm:p-6"
           style={{
             background:
               "radial-gradient(circle at top left, rgba(34,211,238,0.18), transparent 28%), radial-gradient(circle at top right, rgba(168,85,247,0.15), transparent 25%)",
-            padding: "24px",
           }}
         >
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+            <div className="min-w-0 flex-1">
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300 sm:mb-2 sm:text-xs">
                 Social Board Game World
               </p>
-              <h1 className="text-3xl font-bold md:text-4xl text-white">
+              <h1 className="text-2xl font-bold text-white sm:text-3xl md:text-4xl">
                 Game Hub
               </h1>
-              <p className="mt-2 max-w-2xl text-sm text-slate-300 md:text-base">
+              <p className="mt-2 max-w-2xl text-xs text-slate-300 sm:text-sm md:text-base">
                 Walk around the hub, discover hosted game nights, and join tables
                 near you. Real sessions appear first, and dummy sessions keep the
                 world lively while you build.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-200">
+            <div className="flex flex-wrap gap-2 text-[10px] font-medium text-slate-200 sm:text-xs">
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-2">
                 WASD / Arrow keys
               </span>
