@@ -252,7 +252,7 @@ export function HostTournamentForm({
             onChange={(e) =>
               setForm((f) => ({
                 ...f,
-                min_players: parseInt(e.target.value, 10) || null,
+                min_players: parseInt(e.target.value, 10) || 2,
               }))
             }
             className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-[var(--foreground)] focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
@@ -270,7 +270,7 @@ export function HostTournamentForm({
             onChange={(e) =>
               setForm((f) => ({
                 ...f,
-                max_players: parseInt(e.target.value, 10) || null,
+                max_players: parseInt(e.target.value, 10) || 16,
               }))
             }
             className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-[var(--foreground)] focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"

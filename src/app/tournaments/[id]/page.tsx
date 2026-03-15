@@ -7,9 +7,9 @@ import { HostTournamentControls } from "@/components/tournaments/HostTournamentC
 export default async function TournamentPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = await params;
+  const { id } = params;
   const supabase = await createClient();
 
   const {
@@ -66,7 +66,7 @@ export default async function TournamentPage({
     .eq("tournament_id", id)
     .order("table_number", { ascending: true });
 
-  const isHost = user && user.id === tournament.host_id;
+  const isHost = !!user && user.id === tournament.host_id;
   const hasJoined =
     !!user &&
     !!players?.some((p) => {
@@ -85,18 +85,24 @@ export default async function TournamentPage({
     <div className="mx-auto min-w-0 max-w-6xl px-4 py-6 sm:py-8">
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold text-[var(--foreground)] break-words sm:text-2xl">
+          <h1 className="break-words text-xl font-bold text-[var(--foreground)] sm:text-2xl">
             {tournament.name}
           </h1>
+
           <p className="mt-1 text-sm text-[var(--muted)]">
-            {tournament.game?.name} · {tournament.format.replace(/_/g, " ")} ·{" "}
-            {new Date(tournament.starts_at).toLocaleString()}
+            {tournament.game?.name ?? "Unknown game"} ·{" "}
+            {tournament.format?.replace(/_/g, " ") ?? "Unknown format"} ·{" "}
+            {tournament.starts_at
+              ? new Date(tournament.starts_at).toLocaleString()
+              : "Start time TBD"}
           </p>
+
           {tournament.description && (
             <p className="mt-3 text-sm text-[var(--muted)]">
               {tournament.description}
             </p>
           )}
+
           {!!players?.length && (
             <p className="mt-2 text-sm text-[var(--muted)]">
               Players joined:{" "}
@@ -114,22 +120,25 @@ export default async function TournamentPage({
             <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 font-medium text-[var(--accent)]">
               Host: {tournament.host?.display_name ?? "Unknown"}
             </span>
-  
+
             {tournament.is_strategy_focused && (
               <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400">
                 Strategy expert
               </span>
             )}
+
             <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 font-medium text-[var(--accent)]">
-              {tournament.players_per_match} per table
+              {tournament.players_per_match ?? "?"} per table
             </span>
+
             {tournament.city && (
               <span className="rounded-full bg-[var(--card)] px-3 py-1">
                 {tournament.city}
               </span>
             )}
+
             <span className="rounded-full bg-[var(--card)] px-3 py-1 capitalize">
-              {tournament.privacy.replace(/_/g, " ")}
+              {tournament.privacy?.replace(/_/g, " ") ?? "public"}
             </span>
           </div>
         </div>
@@ -153,7 +162,10 @@ export default async function TournamentPage({
       <div className="mt-6 grid min-w-0 gap-6 sm:mt-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="space-y-6">
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4">
-            <h2 className="text-sm font-semibold text-[var(--foreground)]">Players</h2>
+            <h2 className="text-sm font-semibold text-[var(--foreground)]">
+              Players
+            </h2>
+
             {!players?.length ? (
               <p className="mt-2 text-sm text-[var(--muted)]">
                 No players have joined yet.
@@ -168,12 +180,16 @@ export default async function TournamentPage({
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent)]/10 text-xs font-semibold text-[var(--accent)]">
                       {p.profile?.display_name?.[0]?.toUpperCase() ?? "P"}
                     </div>
+
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-[var(--foreground)]">
                         {p.profile?.display_name ?? "Player"}
                       </span>
                       <span className="text-xs text-[var(--muted)]">
-                        Joined {new Date(p.joined_at).toLocaleString()}
+                        Joined{" "}
+                        {p.joined_at
+                          ? new Date(p.joined_at).toLocaleString()
+                          : "recently"}
                       </span>
                     </div>
                   </li>
@@ -186,15 +202,18 @@ export default async function TournamentPage({
             <h2 className="text-sm font-semibold text-[var(--foreground)]">
               Rounds & tables
             </h2>
+
             {!rounds?.length ? (
               <p className="mt-2 text-sm text-[var(--muted)]">
-                The host will generate the first round once enough players have joined.
+                The host will generate the first round once enough players have
+                joined.
               </p>
             ) : (
               <div className="mt-4 space-y-4">
                 {rounds.map((round) => {
                   const roundMatches =
                     matches?.filter((m) => m.round_id === round.id) ?? [];
+
                   return (
                     <div
                       key={round.id}
@@ -205,8 +224,8 @@ export default async function TournamentPage({
                           <p className="text-sm font-semibold text-[var(--foreground)]">
                             {round.name ?? `Round ${round.round_number}`}
                           </p>
-                          <p className="text-xs text-[var(--muted)] capitalize">
-                            {round.status.replace(/_/g, " ")}
+                          <p className="text-xs capitalize text-[var(--muted)]">
+                            {round.status?.replace(/_/g, " ") ?? "pending"}
                           </p>
                         </div>
                       </div>
@@ -224,12 +243,13 @@ export default async function TournamentPage({
                             >
                               <div className="flex items-center justify-between">
                                 <p className="text-xs font-semibold text-[var(--foreground)]">
-                                  Table {m.table_number}
+                                  Table {m.table_number ?? "?"}
                                 </p>
                                 <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--accent)]">
-                                  {m.status}
+                                  {m.status ?? "pending"}
                                 </span>
                               </div>
+
                               <ul className="mt-2 space-y-1">
                                 {(m.match_players ?? []).map((mp: any) => (
                                   <li
@@ -237,18 +257,19 @@ export default async function TournamentPage({
                                     className="flex items-center justify-between text-xs"
                                   >
                                     <span className="text-[var(--foreground)]">
-                                      {mp.tournament_player?.profile?.display_name ??
-                                        "Player"}
+                                      {mp.tournament_player?.profile
+                                        ?.display_name ?? "Player"}
                                     </span>
+
                                     {typeof mp.placement === "number" && (
                                       <span className="rounded-full bg-[var(--background)] px-2 py-0.5 text-[10px] text-[var(--muted)]">
                                         {mp.placement === 1
                                           ? "1st"
                                           : mp.placement === 2
-                                          ? "2nd"
-                                          : mp.placement === 3
-                                          ? "3rd"
-                                          : `${mp.placement}th`}
+                                            ? "2nd"
+                                            : mp.placement === 3
+                                              ? "3rd"
+                                              : `${mp.placement}th`}
                                       </span>
                                     )}
                                   </li>
@@ -274,4 +295,3 @@ export default async function TournamentPage({
     </div>
   );
 }
-

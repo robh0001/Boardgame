@@ -4,8 +4,9 @@ import { generateInitialRound } from "@/lib/tournaments/pairings";
 
 export async function POST(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const supabase = await createClient();
 
   const {
@@ -19,7 +20,7 @@ export async function POST(
   const { data: tournament, error: tError } = await supabase
     .from("tournaments")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (tError || !tournament) {
@@ -33,7 +34,7 @@ export async function POST(
   const { data: players, error: pError } = await supabase
     .from("tournament_players")
     .select("*")
-    .eq("tournament_id", params.id)
+    .eq("tournament_id", id)
     .eq("is_approved", true);
 
   if (pError) {
