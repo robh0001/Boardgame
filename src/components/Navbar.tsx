@@ -58,7 +58,7 @@ export function Navbar() {
           href="/"
           className="shrink-0 text-lg font-extrabold tracking-tight text-[var(--accent)] sm:text-xl"
         >
-          Play & Meet
+          BoardWalks
         </Link>
 
         {/* Desktop: full links */}
