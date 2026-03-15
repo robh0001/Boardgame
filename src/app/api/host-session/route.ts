@@ -86,20 +86,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { error } = await supabase.from("game_sessions").insert({
-      host_id: user.id,
-      game_id,
-      title,
-      city,
-      address: address || null,
-      venue_name: venue_name || null,
-      starts_at,
-      max_players,
-      notes: notes || null,
+    const { data: session, error: sessionError } = await supabase
+      .from("game_sessions")
+      .insert({
+        host_id: user.id,
+        game_id,
+        title,
+        city,
+        address: address || null,
+        venue_name: venue_name || null,
+        starts_at,
+        max_players,
+        notes: notes || null,
+      })
+      .select("id")
+      .single();
+
+    if (sessionError || !session) {
+      return NextResponse.json(
+        { error: sessionError?.message ?? "Failed to create session" },
+        { status: 500 },
+      );
+    }
+
+    const { error: playerError } = await supabase.from("session_players").insert({
+      session_id: session.id,
+      user_id: user.id,
     });
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (playerError) {
+      return NextResponse.json(
+        { error: playerError.message ?? "Session created but failed to add host as player" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ success: true });
