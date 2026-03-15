@@ -10,6 +10,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/games", label: "Games" },
   { href: "/sessions", label: "Sessions" },
+  { href: "/tournaments", label: "Tournaments" },
   { href: "/hub", label: "Hub" },
 ];
 

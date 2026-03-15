@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { JoinButton } from "./JoinButton";
+import { ReportHostButton } from "./ReportHostButton";
 
 export default async function SessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -85,6 +86,10 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
               session.status !== "open" && (
                 <p className="text-sm text-[var(--muted)]">This session is not open for new players.</p>
               )
+            )}
+
+            {!isHost && (
+              <ReportHostButton sessionId={id} reportedHostId={session.host_id} />
             )}
           </div>
         )}
