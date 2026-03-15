@@ -51,7 +51,9 @@ export function HostTournamentForm({
     venue_name: "",
     privacy: "public" as "public" | "private" | "invite_only",
     entry_cap: "",
-    cover_image_url: ""
+    cover_image_url: "",
+    is_beginner_friendly: false,
+    is_strategy_focused: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
